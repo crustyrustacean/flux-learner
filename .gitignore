@@ -10,7 +10,7 @@
 /target
 
 # Model Prompts
-prompt.*
+user.*
 system.*
 
 # Model Output

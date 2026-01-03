@@ -1,6 +1,6 @@
 [package]
 name = "hello-openrouter"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 
 [[bin]]
@@ -8,6 +8,7 @@ name = "hello-openrouter"
 path = "src/bin/main.rs"
 
 [dependencies]
+clap = { version = "4.5.54", features = [ "derive" ] }
 dotenvy = "0.15.7"
 reqwest = { version = "0.13.1", features = ["json"] }
 serde = { version = "1.0.228", features = ["derive"] }
