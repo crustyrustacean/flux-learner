@@ -1,0 +1,17 @@
+# hello-openrouter gitignore configuration
+
+# VS Code Settings
+.vscode
+
+# Environment Variables
+.env
+
+# Build Artifacts
+/target
+
+# Model Prompts
+prompt.*
+system.*
+
+# Model Output
+output.*
