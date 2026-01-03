@@ -10,7 +10,7 @@ use std::io::Write;
 
 #[derive(Parser)]
 struct Args {
-    #[arg(short, long, default_value = "anthropic/claude-sonnet-4")]  
+    #[arg(short, long, default_value = "anthropic/claude-sonnet-4")]
     model: String,
 
     #[arg(short, long)]
@@ -23,28 +23,24 @@ struct Args {
     output_name: String,
 }
 
-async fn run(model: &str, user_prompt: &str, system_prompt: &str, output_name: &str) -> Result<(), AppError> {
-    dotenvy::dotenv()?;
+async fn run(api_key: &str, args: &Args) -> Result<(), AppError> {
+    let openrouter_client = OpenRouterClient::new(api_key.to_string());
 
-    let openrouter_api_key = env::var("OPENROUTER_API_KEY")?;
-
-    let openrouter_client = OpenRouterClient::new(openrouter_api_key);
-
-    let system_prompt = fs::read_to_string(system_prompt)?;
-    let user_prompt = fs::read_to_string(user_prompt)?;
+    let system_prompt = fs::read_to_string(&args.system_prompt)?;
+    let user_prompt = fs::read_to_string(&args.user_prompt)?;
 
     let openrouter_client_response = openrouter_client
-        .chat(model, &system_prompt, &user_prompt)
+        .chat(&args.model, &system_prompt, &user_prompt)
         .await?;
 
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
-        .open(output_name)?;
+        .open(&args.output_name)?;
 
     writeln!(file, "{}", openrouter_client_response.content())?;
 
-    println!("Results in the file {}", output_name);
+    println!("Results in the file {}", args.output_name);
     println!(
         "Tokens used: {} prompt, {} completion, {} total",
         openrouter_client_response.prompt_tokens(),
@@ -57,9 +53,19 @@ async fn run(model: &str, user_prompt: &str, system_prompt: &str, output_name: &
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
+
+    let api_key = match env::var("OPENROUTER_API_KEY") {
+        Ok(key) => key,
+        Err(e) => {
+            eprintln!("Error: {e}");
+            std::process::exit(1);
+        }
+    };
+
     let args = Args::parse();
-    
-    if let Err(e) = run(&args.model, &args.system_prompt, &args.user_prompt, &args.output_name).await {
+
+    if let Err(e) = run(&api_key, &args).await {
         eprintln!("Error: {e}");
         std::process::exit(1);
     }
