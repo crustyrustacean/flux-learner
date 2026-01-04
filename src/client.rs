@@ -10,21 +10,25 @@ use serde_json::json;
 #[cfg(feature = "vision")]
 use std::path::Path;
 
-// constants
-const OPENROUTER_URL: &str = "https://openrouter.ai/api/v1/chat/completions";
-
 pub struct OpenRouterClient {
     http_client: Client,
     api_key: String,
+    base_url: String,
 }
 
 impl OpenRouterClient {
     pub fn new(api_key: String) -> Self {
-        let http_client = Client::new();
-
-        Self {
-            http_client,
+        Self::with_base_url(
             api_key,
+            "https://openrouter.ai/api/v1/chat/completions".to_string(),
+        )
+    }
+
+    pub fn with_base_url(api_key: String, base_url: String) -> Self {
+        Self {
+            http_client: Client::new(),
+            api_key,
+            base_url,
         }
     }
 
@@ -50,7 +54,7 @@ impl OpenRouterClient {
 
         let response = self
             .http_client
-            .post(OPENROUTER_URL)
+            .post(&self.base_url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&body)
             .send()
