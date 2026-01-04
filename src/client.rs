@@ -100,7 +100,7 @@ impl OpenRouterClient {
 
         let response = self
             .http_client
-            .post(OPENROUTER_URL)
+            .post(&self.base_url)
             .header("Authorization", format!("Bearer {}", self.api_key))
             .json(&body)
             .send()
