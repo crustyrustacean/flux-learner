@@ -19,6 +19,10 @@ struct Args {
     #[arg(short, long)]
     user_prompt: String,
 
+    #[cfg(feature = "vision")]
+    #[arg(short, long)]
+    image: Option<String>,
+
     #[arg(short, long, default_value = "output.md")]
     output_name: String,
 }
@@ -29,8 +33,20 @@ async fn run(api_key: &str, args: &Args) -> Result<(), AppError> {
     let system_prompt = fs::read_to_string(&args.system_prompt)?;
     let user_prompt = fs::read_to_string(&args.user_prompt)?;
 
+    #[cfg(feature = "vision")]
+    let openrouter_client_response = if let Some(ref image_path) = args.image {
+        openrouter_client
+            .chat_with_image(&args.model, &user_prompt, &system_prompt, image_path)
+            .await?
+    } else {
+        openrouter_client
+            .chat(&args.model, &user_prompt, &system_prompt)
+            .await?
+    };
+
+    #[cfg(not(feature = "vision"))]
     let openrouter_client_response = openrouter_client
-        .chat(&args.model, &system_prompt, &user_prompt)
+        .chat(&args.model, &user_prompt, &system_prompt)
         .await?;
 
     let mut file = OpenOptions::new()
