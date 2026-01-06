@@ -69,7 +69,7 @@ impl OpenRouterClient {
                     .method("POST")
                     .header("Authorization", format!("Bearer {}", self.api_key))
                     .header("Content-Type", "application/json")
-                    .body(Body::new(body))?,
+                    .body(body.into())?,
             )
             .await?;
 
@@ -125,7 +125,7 @@ impl OpenRouterClient {
                     .method("POST")
                     .header("Authorization", format!("Bearer {}", self.api_key))
                     .header("Content-Type", "application/json")
-                    .body(Body::new(body))?,
+                    .body(body.into())?,
             )
             .await?;
         
