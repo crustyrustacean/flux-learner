@@ -5,7 +5,9 @@ use crate::domain::OpenRouterResponse;
 use crate::error::AppError;
 #[cfg(feature = "vision")]
 use base64::{Engine, engine::general_purpose::STANDARD};
-use rama::http::{Body, BodyExtractExt};
+use rama::http::BodyExtractExt;
+use rama::http::headers::ContentType;
+use rama::http::service::client::HttpClientExt;
 use rama::service::{BoxService, Service};
 use rama::{
     error::OpaqueError,
@@ -63,15 +65,12 @@ impl OpenRouterClient {
 
         let response = self
             .http_client
-            .serve(
-                Request::builder()
-                    .uri(&self.base_url)
-                    .method("POST")
-                    .header("Authorization", format!("Bearer {}", self.api_key))
-                    .header("Content-Type", "application/json")
-                    .body(body.into())?,
-            )
-            .await?;
+                .post(&self.base_url)
+                .header("Authorization", format!("Bearer {}", self.api_key))
+                .typed_header(ContentType::json())
+                .json(&body)
+                .send()
+                .await?;
 
         let chat_response = response.try_into_json::<OpenRouterResponse>().await?;
 
@@ -119,16 +118,13 @@ impl OpenRouterClient {
 
         let response = self
             .http_client
-            .serve(
-                Request::builder()
-                    .uri(&self.base_url)
-                    .method("POST")
-                    .header("Authorization", format!("Bearer {}", self.api_key))
-                    .header("Content-Type", "application/json")
-                    .body(body.into())?,
-            )
-            .await?;
-        
+                .post(&self.base_url)
+                .header("Authorization", format!("Bearer {}", self.api_key))
+                .typed_header(ContentType::json())
+                .json(&body)
+                .send()
+                .await?;
+
         println!("Status: {}", response.status());
         let chat_response = response.try_into_json::<OpenRouterResponse>().await?;
 
