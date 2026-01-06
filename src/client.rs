@@ -128,7 +128,8 @@ impl OpenRouterClient {
                     .body(Body::new(body))?,
             )
             .await?;
-
+        
+        println!("Status: {}", response.status());
         let chat_response = response.try_into_json::<OpenRouterResponse>().await?;
 
         Ok(chat_response)
