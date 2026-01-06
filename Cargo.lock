@@ -196,11 +196,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
+name = "aws-lc-fips-sys"
+version = "0.13.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57900537c00a0565a35b63c4c281b372edfc9744b072fd4a3b414350a8f5ed48"
+dependencies = [
+ "bindgen",
+ "cc",
+ "cmake",
+ "dunce",
+ "fs_extra",
+ "regex",
+]
+
+[[package]]
 name = "aws-lc-rs"
 version = "1.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a88aab2464f1f25453baa7a07c84c5b7684e274054ba06817f382357f77a288"
 dependencies = [
+ "aws-lc-fips-sys",
  "aws-lc-sys",
  "untrusted 0.7.1",
  "zeroize",
@@ -212,6 +227,7 @@ version = "0.35.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b45afffdee1e7c9126814751f88dddc747f41d91da16c9551a0f1e8a11e788a1"
 dependencies = [
+ "bindgen",
  "cc",
  "cmake",
  "dunce",
@@ -234,6 +250,8 @@ dependencies = [
  "cexpr",
  "clang-sys",
  "itertools 0.13.0",
+ "log",
+ "prettyplease",
  "proc-macro2",
  "quote",
  "regex",
@@ -927,7 +945,7 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "hello-openrouter"
-version = "0.6.4"
+version = "0.6.5"
 dependencies = [
  "base64",
  "clap",
@@ -1704,6 +1722,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "prettyplease"
+version = "0.2.37"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "479ca8adacdd7ce8f1fb39ce9ecccbfe93a3f1344b3d0d97f20bc0196208f62b"
+dependencies = [
+ "proc-macro2",
+ "syn",
+]
+
+[[package]]
 name = "proc-macro-crate"
 version = "3.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1790,9 +1818,11 @@ version = "0.3.0-alpha.4"
 source = "git+https://github.com/plabayo/rama.git?tag=rama-0.3.0-alpha.4#4733273a10a791762e2b7727850032b0c9b8536d"
 dependencies = [
  "ahash",
+ "base64",
  "opentelemetry-otlp",
  "pin-project-lite",
  "rama-core",
+ "rama-crypto",
  "rama-dns",
  "rama-http",
  "rama-http-backend",
@@ -1807,6 +1837,7 @@ dependencies = [
  "rama-utils",
  "rama-ws",
  "rustversion",
+ "serde",
  "tokio",
  "tracing-subscriber",
 ]
@@ -1867,6 +1898,22 @@ dependencies = [
  "tokio-graceful",
  "tokio-util",
  "tracing",
+]
+
+[[package]]
+name = "rama-crypto"
+version = "0.3.0-alpha.4"
+source = "git+https://github.com/plabayo/rama.git?tag=rama-0.3.0-alpha.4#4733273a10a791762e2b7727850032b0c9b8536d"
+dependencies = [
+ "aws-lc-rs",
+ "base64",
+ "rama-core",
+ "rama-utils",
+ "rcgen",
+ "rustls-pki-types",
+ "serde",
+ "serde_json",
+ "x509-parser",
 ]
 
 [[package]]

@@ -46,18 +46,18 @@ impl OpenRouterClient {
     ) -> Result<OpenRouterResponse, AppError> {
         let body = format!(
             r#"{{
-        "model": {},
-        "messages": [
-            {{
-                "role": "system",
-                "content": {}
-            }},
-            {{
-                "role": "user",
-                "content": {}
-            }}
-        ]
-    }}"#,
+    "model": {},
+    "messages": [
+        {{
+            "role": "system",
+            "content": {}
+        }},
+        {{
+            "role": "user",
+            "content": {}
+        }}
+    ]
+}}"#,
             serde_json::to_string(&model).unwrap(),
             serde_json::to_string(&system_prompt).unwrap(),
             serde_json::to_string(&user_prompt).unwrap()
@@ -65,12 +65,12 @@ impl OpenRouterClient {
 
         let response = self
             .http_client
-                .post(&self.base_url)
-                .header("Authorization", format!("Bearer {}", self.api_key))
-                .typed_header(ContentType::json())
-                .json(&body)
-                .send()
-                .await?;
+            .post(&self.base_url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .typed_header(ContentType::json())
+            .body(body)
+            .send()
+            .await?;
 
         let chat_response = response.try_into_json::<OpenRouterResponse>().await?;
 
@@ -118,14 +118,13 @@ impl OpenRouterClient {
 
         let response = self
             .http_client
-                .post(&self.base_url)
-                .header("Authorization", format!("Bearer {}", self.api_key))
-                .typed_header(ContentType::json())
-                .json(&body)
-                .send()
-                .await?;
+            .post(&self.base_url)
+            .header("Authorization", format!("Bearer {}", self.api_key))
+            .typed_header(ContentType::json())
+            .body(body)
+            .send()
+            .await?;
 
-        println!("Status: {}", response.status());
         let chat_response = response.try_into_json::<OpenRouterResponse>().await?;
 
         Ok(chat_response)

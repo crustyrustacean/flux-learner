@@ -9,9 +9,6 @@ pub enum AppError {
     #[error("HTTP client failed: {0}")]
     Opaque(#[from] rama::error::OpaqueError),
 
-    #[error("HTTP request failed: {0}")]
-    Http(#[from] rama::http::HttpError),
-
     #[error("Environment variable error: {0}")]
     Env(#[from] env::VarError),
 
