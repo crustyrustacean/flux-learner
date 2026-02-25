@@ -10,28 +10,28 @@ use std::io::Write;
 
 #[derive(Parser)]
 struct Args {
-    #[arg(short, long, default_value = "anthropic/claude-sonnet-4")]
+    #[arg(short, long, default_value = "anthropic/claude-sonnet-4.6")]
     model: String,
 
     #[arg(short, long)]
-    system_prompt: String,
+    template: String,
 
     #[arg(short, long)]
-    user_prompt: String,
+    source: String,
 
     #[cfg(feature = "vision")]
     #[arg(short, long)]
     image: Option<String>,
 
     #[arg(short, long, default_value = "output.md")]
-    output_name: String,
+    output: String,
 }
 
 async fn run(api_key: &str, args: &Args) -> Result<(), AppError> {
     let openrouter_client = OpenRouterClient::new(api_key.to_string());
 
-    let system_prompt = fs::read_to_string(&args.system_prompt)?;
-    let user_prompt = fs::read_to_string(&args.user_prompt)?;
+    let system_prompt = fs::read_to_string(&args.template)?;
+    let user_prompt = fs::read_to_string(&args.source)?;
 
     #[cfg(feature = "vision")]
     let openrouter_client_response = if let Some(ref image_path) = args.image {
@@ -52,11 +52,11 @@ async fn run(api_key: &str, args: &Args) -> Result<(), AppError> {
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
-        .open(&args.output_name)?;
+        .open(&args.output)?;
 
     writeln!(file, "{}", openrouter_client_response.content())?;
 
-    println!("Results in the file {}", args.output_name);
+    println!("Results in the file {}", args.output);
     println!(
         "Tokens used: {} prompt, {} completion, {} total",
         openrouter_client_response.prompt_tokens(),

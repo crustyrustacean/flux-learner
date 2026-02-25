@@ -9,9 +9,5 @@
 # Build Artifacts
 /target
 
-# Model Prompts
-user.*
-system.*
-
-# Model Output
-output.*
+# Model Prompts and Output
+*.md
