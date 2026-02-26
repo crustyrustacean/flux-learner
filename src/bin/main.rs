@@ -2,8 +2,9 @@
 
 // dependencies
 use clap::Parser;
-use hello_openrouter::client::OpenRouterClient;
 use hello_openrouter::error::AppError;
+use hello_openrouter::FireCrawlClient;
+use hello_openrouter::openrouter_client::OpenRouterClient;
 use std::env;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
@@ -28,11 +29,12 @@ struct Args {
     output: String,
 }
 
-async fn run(api_key: &str, args: &Args) -> Result<(), AppError> {
-    let openrouter_client = OpenRouterClient::new(api_key.to_string());
+async fn run(openrouter_api_key: &str, firecrawl_api_key: &str, args: &Args) -> Result<(), AppError> {
+    let openrouter_client = OpenRouterClient::new(openrouter_api_key.to_string());
 
     let system_prompt = fs::read_to_string(&args.template)?;
-    let user_prompt = fs::read_to_string(&args.source)?;
+    let fire_crawl_data = FireCrawlClient::new(firecrawl_api_key.to_string()).scrape(&args.source).await?;
+    let user_prompt = fire_crawl_data.data.markdown;
 
     #[cfg(feature = "vision")]
     let openrouter_client_response = if let Some(ref image_path) = args.image {
@@ -76,7 +78,15 @@ async fn run(api_key: &str, args: &Args) -> Result<(), AppError> {
 async fn main() {
     dotenvy::dotenv().ok();
 
-    let api_key = match env::var("OPENROUTER_API_KEY") {
+    let openrouter_api_key = match env::var("OPENROUTER_API_KEY") {
+        Ok(key) => key,
+        Err(e) => {
+            eprintln!("Error: {e}");
+            std::process::exit(1);
+        }
+    };
+
+    let firecrawl_api_key = match env::var("FIRECRAWL_API_KEY") {
         Ok(key) => key,
         Err(e) => {
             eprintln!("Error: {e}");
@@ -86,7 +96,7 @@ async fn main() {
 
     let args = Args::parse();
 
-    if let Err(e) = run(&api_key, &args).await {
+    if let Err(e) = run(&openrouter_api_key, &firecrawl_api_key, &args).await {
         eprintln!("Error: {e}");
         std::process::exit(1);
     }
