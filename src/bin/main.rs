@@ -7,6 +7,7 @@ use hello_openrouter::error::AppError;
 use std::env;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
+use std::path::Path;
 
 #[derive(Parser)]
 struct Args {
@@ -48,6 +49,10 @@ async fn run(api_key: &str, args: &Args) -> Result<(), AppError> {
     let openrouter_client_response = openrouter_client
         .chat(&args.model, &user_prompt, &system_prompt)
         .await?;
+
+    if let Some(parent) = Path::new(&args.output).parent() {
+        fs::create_dir_all(parent)?;
+    }
 
     let mut file = OpenOptions::new()
         .create(true)
