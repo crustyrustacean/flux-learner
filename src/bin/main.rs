@@ -2,8 +2,8 @@
 
 // dependencies
 use clap::Parser;
-use hello_openrouter::error::AppError;
 use hello_openrouter::FireCrawlClient;
+use hello_openrouter::error::AppError;
 use hello_openrouter::openrouter_client::OpenRouterClient;
 use std::env;
 use std::fs::{self, OpenOptions};
@@ -29,12 +29,22 @@ struct Args {
     output: String,
 }
 
-async fn run(openrouter_api_key: &str, firecrawl_api_key: &str, args: &Args) -> Result<(), AppError> {
+async fn run(
+    openrouter_api_key: &str,
+    firecrawl_api_key: &str,
+    args: &Args,
+) -> Result<(), AppError> {
     let openrouter_client = OpenRouterClient::new(openrouter_api_key.to_string());
 
     let system_prompt = fs::read_to_string(&args.template)?;
-    let fire_crawl_data = FireCrawlClient::new(firecrawl_api_key.to_string()).scrape(&args.source).await?;
-    let user_prompt = fire_crawl_data.data.markdown;
+    let user_prompt = if args.source.contains("https://") {
+        let fire_crawl_response = FireCrawlClient::new(firecrawl_api_key.to_string())
+            .scrape(&args.source)
+            .await?;
+        fire_crawl_response.data.markdown
+    } else {
+        fs::read_to_string(&args.source)?
+    };
 
     #[cfg(feature = "vision")]
     let openrouter_client_response = if let Some(ref image_path) = args.image {
