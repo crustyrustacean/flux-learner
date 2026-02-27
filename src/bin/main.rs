@@ -9,6 +9,7 @@ use std::env;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::Path;
+use std::time::Duration;
 
 #[derive(Parser)]
 struct Args {
@@ -106,7 +107,19 @@ async fn main() {
 
     let args = Args::parse();
 
-    if let Err(e) = run(&openrouter_api_key, &firecrawl_api_key, &args).await {
+    let spinner = tokio::spawn(async {
+    loop {
+        print!(".");
+        std::io::stdout().flush().ok();
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+});
+
+    let result = run(&openrouter_api_key, &firecrawl_api_key, &args).await;
+
+    spinner.abort();
+
+    if let Err(e) = result {
         eprintln!("Error: {e}");
         std::process::exit(1);
     }

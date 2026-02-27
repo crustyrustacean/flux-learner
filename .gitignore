@@ -8,6 +8,3 @@
 
 # Build Artifacts
 /target
-
-# Model Prompts and Output
-*.md
