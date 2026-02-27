@@ -1,6 +1,6 @@
-# hello-openrouter
+# flux-learner
 
-A personal learning tool built in Rust that transforms documentation into structured study materials.
+A personal learning tool built in Rust that transforms documentation into structured study materials. Part of the `flux-` family of crates.
 
 Point it at any web page or local file, choose an LLM, apply a learning template, and get back a study document tailored to how you learn — with progressive examples, common mistakes, compiler errors, and self-test questions.
 
@@ -15,14 +15,14 @@ Point it at any web page or local file, choose an LLM, apply a learning template
 
 ```bash
 # From a web page
-hello-openrouter \
+flux-learner \
   -t templates/deep-dive.md \
   -s https://tokio.rs/blog/2021-05-14-inventing-the-service-trait \
   -m anthropic/claude-sonnet-4.5 \
   -o my-rust-book/src/service-trait.md
 
 # From a local file
-hello-openrouter \
+flux-learner \
   -t templates/deep-dive.md \
   -s chapters/ownership.md \
   -o my-rust-book/src/ownership.md
