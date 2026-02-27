@@ -1,0 +1,1 @@
+You are an expert in Rust. Given the following source code, explain what it does step by step. For each major component, explain why it is needed and what would break without it. Connect each piece to the Rust language concepts it relies on. Assume I wrote this code but want to understand it more deeply.

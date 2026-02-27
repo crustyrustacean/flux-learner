@@ -2,9 +2,9 @@
 
 // dependencies
 use clap::Parser;
-use hello_openrouter::FireCrawlClient;
-use hello_openrouter::error::AppError;
-use hello_openrouter::openrouter_client::OpenRouterClient;
+use flux_learner::FireCrawlClient;
+use flux_learner::error::AppError;
+use flux_learner::openrouter_client::OpenRouterClient;
 use std::env;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
