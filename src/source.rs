@@ -42,7 +42,7 @@ pub fn walk_directory(
         .filter(|entry| entry.file_type().map_or(false, |ft| ft.is_file()))
         .filter_map(|entry| {
             let abs = entry.path().to_path_buf();
-            let rel = abs.strip_prefix(&dir_path).ok()?.to_string_lossy().into_owned();
+            let rel = abs.strip_prefix(&dir_path).ok()?.to_string_lossy().replace('\\', "/");
             let content = fs::read_to_string(&abs).ok()?;
             Some((rel, content))
         })
