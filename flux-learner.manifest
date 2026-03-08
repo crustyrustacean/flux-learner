@@ -1,0 +1,10 @@
+# flux-learner.manifest
+# Study this codebase — entry points first, then domain, then clients.
+
+src/bin/main.rs
+src/lib.rs
+src/error.rs
+src/domain.rs
+src/source.rs
+src/openrouter_client.rs
+src/firecrawl_client.rs

@@ -5,6 +5,7 @@ use clap::Parser;
 use flux_learner::FireCrawlClient;
 use flux_learner::error::AppError;
 use flux_learner::openrouter_client::OpenRouterClient;
+use flux_learner::source;
 use std::env;
 use std::fs::{self, OpenOptions};
 use std::io::Write;
@@ -19,8 +20,25 @@ struct Args {
     #[arg(short, long)]
     template: String,
 
-    #[arg(short, long)]
-    source: String,
+    /// URL (fetched via Firecrawl) or local file path
+    #[arg(short, long, group = "input")]
+    source: Option<String>,
+
+    /// Directory to walk recursively (respects .gitignore)
+    #[arg(short, long, group = "input")]
+    dir: Option<String>,
+
+    /// Manifest file listing paths in study order
+    #[arg(long, group = "input")]
+    manifest: Option<String>,
+
+    /// Glob pattern for --dir (default: Rust source files)
+    #[arg(long, default_value = "**/*.rs")]
+    glob: String,
+
+    /// Patterns to exclude from --dir (repeatable)
+    #[arg(long)]
+    exclude: Vec<String>,
 
     #[cfg(feature = "vision")]
     #[arg(short, long)]
@@ -30,21 +48,28 @@ struct Args {
     output: String,
 }
 
-async fn run(
-    openrouter_api_key: &str,
-    firecrawl_api_key: &str,
-    args: &Args,
-) -> Result<(), AppError> {
-    let openrouter_client = OpenRouterClient::new(openrouter_api_key.to_string());
+async fn run(args: &Args) -> Result<(), AppError> {
+    let openrouter_api_key = env::var("OPENROUTER_API_KEY")?;
+    let openrouter_client = OpenRouterClient::new(openrouter_api_key);
 
     let system_prompt = fs::read_to_string(&args.template)?;
-    let user_prompt = if args.source.contains("https://") {
-        let fire_crawl_response = FireCrawlClient::new(firecrawl_api_key.to_string())
-            .scrape(&args.source)
-            .await?;
-        fire_crawl_response.data.markdown
+
+    let user_prompt = if let Some(ref src) = args.source {
+        if src.starts_with("https://") {
+            let firecrawl_api_key = env::var("FIRECRAWL_API_KEY")?;
+            let fire_crawl_response = FireCrawlClient::new(firecrawl_api_key)
+                .scrape(src)
+                .await?;
+            fire_crawl_response.data.markdown
+        } else {
+            fs::read_to_string(src)?
+        }
+    } else if let Some(ref dir) = args.dir {
+        source::walk_directory(dir, &args.glob, &args.exclude)?
+    } else if let Some(ref manifest) = args.manifest {
+        source::read_manifest(manifest)?
     } else {
-        fs::read_to_string(&args.source)?
+        return Err(AppError::NoInput);
     };
 
     #[cfg(feature = "vision")]
@@ -89,33 +114,17 @@ async fn run(
 async fn main() {
     dotenvy::dotenv().ok();
 
-    let openrouter_api_key = match env::var("OPENROUTER_API_KEY") {
-        Ok(key) => key,
-        Err(e) => {
-            eprintln!("Error: {e}");
-            std::process::exit(1);
-        }
-    };
-
-    let firecrawl_api_key = match env::var("FIRECRAWL_API_KEY") {
-        Ok(key) => key,
-        Err(e) => {
-            eprintln!("Error: {e}");
-            std::process::exit(1);
-        }
-    };
-
     let args = Args::parse();
 
     let spinner = tokio::spawn(async {
-    loop {
-        print!(".");
-        std::io::stdout().flush().ok();
-        tokio::time::sleep(Duration::from_millis(100)).await;
-    }
-});
+        loop {
+            print!(".");
+            std::io::stdout().flush().ok();
+            tokio::time::sleep(Duration::from_millis(100)).await;
+        }
+    });
 
-    let result = run(&openrouter_api_key, &firecrawl_api_key, &args).await;
+    let result = run(&args).await;
 
     spinner.abort();
 

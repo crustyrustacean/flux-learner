@@ -5,6 +5,7 @@ pub mod domain;
 pub mod error;
 pub mod firecrawl_client;
 pub mod openrouter_client;
+pub mod source;
 
 // re-exports
 pub use domain::*;

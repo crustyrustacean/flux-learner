@@ -17,4 +17,13 @@ pub enum AppError {
 
     #[error("Failed to read file: {0}")]
     Io(#[from] std::io::Error),
+
+    #[error("File walk error: {0}")]
+    Ignore(String),
+
+    #[error("No files found: {0}")]
+    EmptySource(String),
+
+    #[error("No input specified — provide --source, --dir, or --manifest")]
+    NoInput,
 }
